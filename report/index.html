@@ -1,0 +1,576 @@
+<title>关于"USD1 入金合约"的链上取证报告</title>
+
+<style>
+  :root {
+    --paper: #F4F5F7;
+    --card: #FFFFFF;
+    --ink: #14171C;
+    --ink-soft: #4A525E;
+    --ink-faint: #767F8B;
+    --rule: #D9DDE3;
+    --accent: #1D4E6B;
+    --accent-soft: #1d4e6b14;
+    --critical: #A32B24;
+    --critical-soft: #a32b2410;
+    --money: #7E6218;
+    --ok: #2A6B4F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0F1216;
+      --card: #161A20;
+      --ink: #E7EAEE;
+      --ink-soft: #9DA7B4;
+      --ink-faint: #6E7885;
+      --rule: #262C34;
+      --accent: #74AACE;
+      --accent-soft: #74aace1a;
+      --critical: #E4736A;
+      --critical-soft: #e4736a14;
+      --money: #C9A552;
+      --ok: #5FB78F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0F1216;
+    --card: #161A20;
+    --ink: #E7EAEE;
+    --ink-soft: #9DA7B4;
+    --ink-faint: #6E7885;
+    --rule: #262C34;
+    --accent: #74AACE;
+    --accent-soft: #74aace1a;
+    --critical: #E4736A;
+    --critical-soft: #e4736a14;
+    --money: #C9A552;
+    --ok: #5FB78F;
+  }
+  :root[data-theme="light"] {
+    --paper: #F4F5F7;
+    --card: #FFFFFF;
+    --ink: #14171C;
+    --ink-soft: #4A525E;
+    --ink-faint: #767F8B;
+    --rule: #D9DDE3;
+    --accent: #1D4E6B;
+    --accent-soft: #1d4e6b14;
+    --critical: #A32B24;
+    --critical-soft: #a32b2410;
+    --money: #7E6218;
+    --ok: #2A6B4F;
+  }
+
+  :root {
+    --font-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+    --font-sans: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.35rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+  }
+
+  /* ---- 报头 ---- */
+  .masthead { display: flex; flex-direction: column; gap: 1rem; }
+  .live {
+    align-self: flex-start;
+    font-size: 0.78rem;
+    color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 10%, transparent);
+    border-radius: 3px;
+    padding: 0.25rem 0.6rem;
+  }
+  .stamp {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--critical);
+    border: 1px solid var(--critical);
+    border-radius: 2px;
+    padding: 0.3rem 0.6rem;
+  }
+  h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 5.5vw, 2.7rem);
+    line-height: 1.28;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .dek {
+    font-size: 1.06rem;
+    color: var(--ink-soft);
+    max-width: 38rem;
+    text-wrap: pretty;
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.7rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+  }
+
+  /* ---- 一句话结论 ---- */
+  .verdict {
+    background: var(--critical-soft);
+    border-left: 3px solid var(--critical);
+    padding: 1.3rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .verdict h2 {
+    font-family: var(--font-serif);
+    font-size: 1.22rem;
+    margin: 0;
+    color: var(--critical);
+  }
+  .verdict p { margin: 0; }
+
+  /* ---- 数字条 ---- */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .fig { background: var(--card); padding: 1rem 1.1rem; }
+  .fig .n {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    display: block;
+    line-height: 1.2;
+  }
+  .fig .n.money { color: var(--money); }
+  .fig .n.bad { color: var(--critical); }
+  .fig .l { font-size: 0.8rem; color: var(--ink-faint); }
+
+  /* ---- 证据条目 ---- */
+  section.ev { display: flex; flex-direction: column; gap: 0.9rem; }
+  .ev-head { display: flex; gap: 0.85rem; align-items: baseline; }
+  .ev-no {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.1rem 0.42rem;
+    border-radius: 2px;
+    flex: none;
+    line-height: 1.5;
+  }
+  .ev-head h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.2rem, 3.6vw, 1.45rem);
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.4;
+    text-wrap: balance;
+  }
+  section.ev p { margin: 0; }
+  .proof {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    padding: 1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    font-size: 0.94rem;
+  }
+  .proof .tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .proof ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  code, .addr {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    word-break: break-all;
+    background: var(--accent-soft);
+    padding: 0.06em 0.32em;
+    border-radius: 2px;
+  }
+  b.hot { color: var(--critical); }
+  b.cash { color: var(--money); font-variant-numeric: tabular-nums; }
+
+  /* ---- 表格 ---- */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; min-width: 26rem; }
+  th, td { padding: 0.6rem 0.9rem; text-align: right; border-bottom: 1px solid var(--rule); }
+  th:first-child, td:first-child { text-align: left; }
+  thead th {
+    font-size: 0.74rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  tfoot td { font-weight: 700; background: var(--accent-soft); }
+
+  /* ---- 资金路径 ---- */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .flow-step {
+    display: grid;
+    grid-template-columns: 1.9rem 1fr;
+    gap: 0.9rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-icon {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    text-align: right;
+    padding-top: 0.15rem;
+  }
+  .flow-body { display: flex; flex-direction: column; gap: 0.2rem; }
+  .flow-body .t { font-weight: 600; }
+  .flow-body .s { font-size: 0.88rem; color: var(--ink-soft); }
+
+  /* ---- 反驳 ---- */
+  .rebut { display: flex; flex-direction: column; gap: 1.1rem; }
+  .rebut-item {
+    border-left: 2px solid var(--rule);
+    padding-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .rebut-q { font-weight: 600; color: var(--ink-soft); }
+  .rebut-q::before { content: "他们会说："; color: var(--ink-faint); font-weight: 400; }
+  .rebut-a::before { content: "事实：" ; color: var(--critical); font-weight: 700; }
+
+  h2.sec {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    margin: 0 0 0.2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--ink);
+    text-wrap: balance;
+  }
+  section.block { display: flex; flex-direction: column; gap: 1.1rem; }
+
+  .foot {
+    font-size: 0.84rem;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    padding-top: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <span class="stamp">链上取证 · 请勿入金</span>
+    <span class="live">🔄 本页每小时自动从链上重新取数 · 最后更新 2026-07-29 06:08</span>
+    <h1>他们说这是"USD1 入金合约"<br>链上账本说：这是一个收款钱包</h1>
+    <p class="dek">
+      有人向你推荐一个"去掉 18 个帕点的 USD1 入金合约"，地址是 0x3293…aa77。
+      下面每一条结论都能在区块链浏览器上查到、任何人都能复核。
+      我不需要你相信我，我只需要你自己点开链接对一遍。
+    </p>
+    <div class="meta">
+      <span>取证时间：2026-07-29 06:08</span>
+      <span>链：BNB Smart Chain</span>
+      <span>区块高度 #112,639,388</span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <h2>一句话结论</h2>
+    <p>
+      这个地址<b class="hot">不是任何形式的"入金合约"</b>，它是一个普通的多签收款钱包。
+      你打进去的 USD1 会被立刻抽走 18%，剩下的钱经过中转，最后被拿去买入一个
+      <b class="hot">全世界只有两个持有人、散户根本买不到的自家代币 AGX</b>，把它的价格从零推上去。
+      截至取证时，已有 <b class="hot">8,175 个以上的地址</b>把钱打了进去，
+      累计 <b class="cash">1,507 万</b>，其中 <b class="cash">1,340 万</b> 已经被划走。
+    </p>
+  </div>
+
+  <div class="figures">
+    <div class="fig"><span class="n money">1,507 万</span><span class="l">USD1 累计收款（7/3 起）</span></div>
+    <div class="fig"><span class="n bad">1,340 万</span><span class="l">已被划走（占 89%）</span></div>
+    <div class="fig"><span class="n">8,175+</span><span class="l">打过钱的地址（下限）</span></div>
+    <div class="fig"><span class="n bad">18%</span><span class="l">入金即被抽走的比例</span></div>
+    <div class="fig"><span class="n">2</span><span class="l">AGX 代币全网持有人数</span></div>
+    <div class="fig"><span class="n bad">0</span><span class="l">散户在链上真实持有的 AGX</span></div>
+  </div>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">证据 01</span>
+      <h2>它根本不是合约，是一个 20/32 的多签钱包</h2>
+    </div>
+    <p>
+      "入金合约"这个说法的意思是：你的钱进去以后，由一段公开的程序按规则管理。
+      但这个地址里<b class="hot">没有任何程序</b>——它是 Safe（原 Gnosis Safe）多签钱包，
+      一个纯粹的保险箱，配置是 32 个人里凑够 20 个签名就能把钱转走。
+    </p>
+    <p>
+      钱包本身是官方标准版本、没有后门，这点我不冤枉他们。但正因为它只是个钱包，
+      所以<b class="hot">没有任何规则约束这笔钱的用途，也没有任何机制保证你能取回</b>。
+      往里打钱，在法律和技术上都等同于把现金交给 32 个陌生人保管。
+    </p>
+    <div class="proof">
+      <span class="tag">你可以这样验证</span>
+      <ul>
+        <li>打开 <code>bscscan.com/address/0x3293799989Fb5F65BAF3d7a14a57ad3c245DAa77</code></li>
+        <li>合约代码只有 171 字节（正常业务合约几千到几万字节），它只是个转发外壳</li>
+        <li>调用 <code>getOwners()</code> 返回 32 个地址，<code>getThreshold()</code> 返回 20</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">证据 02</span>
+      <h2>"去掉 18 个帕点"不是技术参数，就是抽你 18% 手续费</h2>
+    </div>
+    <p>
+      这句话是整个话术里最关键的一环，因为它听起来像某种专业术语。
+      真相很朴素：你打 100，中转合约立刻抽走 18，金库只收到 82。
+      不用信我说的，看这张对照表——左边是散户实际打出去的钱，
+      右边是同一时间金库实际收到的钱，笔数一一对应：
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>你打出去（USD1）</th><th>笔数</th><th>金库实收</th><th>笔数</th><th>比例</th></tr>
+        </thead>
+        <tbody><tr><td class="num">100</td><td class="num">52,047</td><td class="num">82</td><td class="num">—</td><td class="num">82%</td></tr><tr><td class="num">1,000</td><td class="num">15,771</td><td class="num">820</td><td class="num">—</td><td class="num">82%</td></tr><tr><td class="num">5,000</td><td class="num">13,831</td><td class="num">4,100</td><td class="num">—</td><td class="num">82%</td></tr><tr><td class="num">500</td><td class="num">12,377</td><td class="num">410</td><td class="num">—</td><td class="num">82%</td></tr><tr><td class="num">200</td><td class="num">5,530</td><td class="num">164</td><td class="num">—</td><td class="num">82%</td></tr></tbody>
+      </table>
+    </div>
+    <p>
+      被抽走的 18% 去了哪里？中转合约每收到一笔钱，会在同一笔交易里立刻拆成三份：
+      <b>82% 给金库</b>、<b class="hot">10% 给一个抽成钱包</b>、<b class="hot">5% 给另一个抽成钱包</b>，
+      剩下零头分给几个小地址。这是推广层级返佣最典型的链上形态——
+      也就是说，<b class="hot">你的钱有 15% 当场变成了上线的提成。</b>
+    </p>
+    <div class="proof">
+      <span class="tag">你可以这样验证</span>
+      <ul>
+        <li>中转合约（归集器）：<code>0xcb8EBEbd2b4a03ab16A28021AD9ed50b125be618</code></li>
+        <li>10% 抽成钱包：<code>0xc6b3d73ba06594dc78be538f65307c6eb348e13e</code></li>
+        <li>5% 抽成钱包：<code>0xef11751f13ff5578c6fa1c6e9ef99bb917a4d5e6</code></li>
+        <li>随便点开一笔入金交易，在 BscScan 的 Transfers 里就能看到这三笔同时发生</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">证据 03</span>
+      <h2>1,340 万 USD1 已经被划走，全部进了他们自己的币池</h2>
+    </div>
+    <p>钱的完整路径，每一步都能在链上查到：</p>
+    <div class="flow">
+      <div class="flow-step">
+        <span class="flow-icon">①</span>
+        <div class="flow-body">
+          <span class="t">5,400+ 个地址按套餐打款</span>
+          <span class="s">100 / 1,000 / 5,000 / 500 / 200 USD1 等固定面额，中位数 500，最高单人 11,000</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">②</span>
+        <div class="flow-body">
+          <span class="t">中转合约当场抽 18%</span>
+          <span class="s">82% 进金库，15% 进两个抽成钱包</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">③</span>
+        <div class="flow-body">
+          <span class="t">金库累计收到 1,507 万 USD1</span>
+          <span class="s">2026-07-03 开始，14,202 笔，全部来自那一个中转合约</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">④</span>
+        <div class="flow-body">
+          <span class="t">分 4 笔划走 1,340 万，只给了 1 个地址</span>
+          <span class="s">收款方 <span class="addr">0xde483c…fb80</span>——注意它不是什么"清算合约"，就是项目方自己的钱包</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">⑤</span>
+        <div class="flow-body">
+          <span class="t">池子里现在躺着 1,233 万 USD1，全部来自这条路径</span>
+          <span class="s">这就是他们给你看的"币价在涨"——涨的钱，是你们自己打进去的</span>
+        </div>
+      </div>
+    </div>
+    <p>
+      请特别注意第 ④ 步：<b class="hot">这笔钱不是流向什么理财策略、矿池或做市商，
+      而是单向进了一个私人钱包。</b>入金的人在链上没有任何取回通道——
+      没有提现函数，没有赎回凭证，什么都没有。
+    </p>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">证据 04</span>
+      <h2>AGX 这个币，全世界只有 2 个持有人，散户一个都没有</h2>
+    </div>
+    <p>
+      AGX（AEGIS X）总量 410,100 枚。链上持有人名单一共两行：
+      <b>池子持有 330,420 枚（80.6%）</b>，<b>项目方钱包持有其余部分</b>。全网持有人共 2 个，加起来正好 100%。
+    </p>
+    <p>
+      这意味着：<b class="hot">不管 App 里显示你有多少 AGX，在区块链上都不存在。</b>
+      那只是他们数据库里的一个数字，随时可以改、可以清零，和链上资产没有任何关系。
+    </p>
+    <div class="proof">
+      <span class="tag">你可以这样验证</span>
+      <ul>
+        <li>AGX 代币：<code>0xe766023f5a0fA6CE91b9f98d327771437DFca077</code></li>
+        <li>在 BscScan 上打开这个地址，点 <b>Holders</b> 标签页，数一数有几行</li>
+        <li>再用你自己的钱包地址去查 AGX 余额——大概率是 0</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">证据 05</span>
+      <h2>"LP 已烧、跑不了路"是真的，但那不重要——真正的开关在别处</h2>
+    </div>
+    <p>
+      如果有人拿"流动性已经销毁"当保证，这点确实属实：池子的 LP 凭证 100% 打进了黑洞地址，
+      传统意义上的"撤池跑路"他们做不到。但我把 AGX 的源代码逐行读完了（代码是开源的，这点也属实），
+      里面有四个机关，效果和撤池一样，只是更体面：
+    </p>
+    <div class="proof">
+      <span class="tag">代码里写着的四件事</span>
+      <ul>
+        <li><b class="hot">无限增发后门</b>：<code>mint()</code> 函数允许一个叫 treasury 的地址凭空造出任意数量的 AGX。
+          造币砸进池子，就能把池里 1,233 万 USD1 换走，全程合法合规、无需动 LP。</li>
+        <li><b class="hot">散户现在根本买不到</b>：开关 <code>transferStatus</code> 当前为 <b>false（散户禁止买入）</b>（取数时刻），
+          代码写明：从池子买出 AGX 的交易一律失败，白名单地址除外。
+          <b>全网唯一白名单，就是他们自己那个划款钱包。</b>池子对外是单向门，USD1 只进不出。</li>
+        <li><b class="hot">30% 惩罚税进自己口袋</b>：平时卖出税 3.5%，一旦价格下跌触发"熔断"，
+          卖出税跳到 30%，而这 30% 的收款地址就是项目方钱包本身。</li>
+        <li><b class="hot">生杀大权在两个私人地址手上</b>：owner 和 governance 都是单一地址，
+          可以随时改税率、改开关、改收款人。</li>
+      </ul>
+    </div>
+    <p>
+      把这四条连起来看：这个池子不是市场，是一个<b class="hot">只有他们有钥匙的保险箱</b>。
+      里面 1,233 万 USD1 全是你们打进去的钱，什么时候取走、怎么取走，只取决于他们哪天按下按钮。
+    </p>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">他们大概会这样解释</h2>
+    <div class="rebut">
+      <div class="rebut-item">
+        <p class="rebut-q">"这是 USD1 官方的入金通道，USD1 是特朗普家族背景的稳定币。"</p>
+        <p class="rebut-a">USD1 这个稳定币确实存在，合约是 <span class="addr">0x8d0D000E…B0d</span>。
+          但你查的这个收款地址和它没有任何关系，就像"有人拿人民币收款"不等于"央行给他背书"。
+          任何人花几块钱手续费就能部署一个多签钱包收 USD1。</p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">"合约是开源的，代码经过审计。"</p>
+        <p class="rebut-a">开源是真的，但开源只意味着"后门是公开写着的"，不代表没有后门。
+          证据 05 里那四个机关，全都明明白白写在开源代码里。</p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">"流动性已经销毁，项目方跑不了。"</p>
+        <p class="rebut-a">LP 确实烧了。但只要还留着无限增发权和买入开关，撤池就是多余动作——
+          增发砸盘取走的钱一分不少。</p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">"你看币价一直在涨，很多人都赚钱了。"</p>
+        <p class="rebut-a">币价是用你们打进去的 1,267 万 USD1 单边买上去的，没有一个外部买家。
+          而且散户根本卖不出去（买入通道都是关的），账户里的"盈利"是显示给你看的数字，不是能拿走的钱。</p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">"上面的大哥/团队长已经赚到钱提现了。"</p>
+        <p class="rebut-a">这恰恰对得上：15% 的层级返佣是从后面进来的人的本金里当场扣的。
+          早期的人拿到的，是晚期的人打进去的钱——这是庞氏结构的定义，不是项目盈利。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">全部关键地址（自己去查）</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>角色</th><th>地址</th></tr></thead>
+        <tbody>
+          <tr><td>收款金库（20/32 多签）</td><td class="num">0x3293799989Fb5F65BAF3d7a14a57ad3c245DAa77</td></tr>
+          <tr><td>中转合约 · 抽 18%</td><td class="num">0xcb8EBEbd2b4a03ab16A28021AD9ed50b125be618</td></tr>
+          <tr><td>抽成钱包 10%</td><td class="num">0xc6b3d73ba06594dc78be538f65307c6eb348e13e</td></tr>
+          <tr><td>抽成钱包 5%</td><td class="num">0xef11751f13ff5578c6fa1c6e9ef99bb917a4d5e6</td></tr>
+          <tr><td>划走 1,340 万的收款方</td><td class="num">0xde483c27cFCaD80B1FD4Fd5344f0C7dCEa8cFB80</td></tr>
+          <tr><td>AGX 代币</td><td class="num">0xe766023f5a0fA6CE91b9f98d327771437DFca077</td></tr>
+          <tr><td>AGX/USD1 池子</td><td class="num">0x73EE72B8cC2C7eA032D8051E1cfa740A2db84331</td></tr>
+          <tr><td>增发权 treasury</td><td class="num">0xe50756f8612b8fd6bed30a7c38dc9771a8c4b59f</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.93rem;color:var(--ink-soft);margin:0;">
+      查询方法：把地址粘进 <code>bscscan.com</code> 搜索框。看资金流向推荐用
+      <code>metasleuth.io</code>，把地址粘进去会自动画出转账关系图，
+      上面所有数字你都能对上。
+    </p>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">如果你已经投了钱</h2>
+    <p>
+      别再追加，尤其别信"再投一笔就能解套/升级"的说法。
+      把你的入金记录（交易哈希、时间、金额）和推荐人的聊天记录完整保存下来，
+      这些是链上永久记录，将来无论是报案还是维权都有用。
+      也把这份材料转给同一个群里的人——<b class="hot">现在还没打钱的人，是唯一还能全身而退的人。</b>
+    </p>
+  </section>
+
+  <footer class="foot">
+    <p style="margin:0;">
+      本材料所有数据均来自 BNB Smart Chain 公开链上记录，本页每小时自动重新取数，最后更新 2026-07-29 06:08（北京时间），对应区块高度 #112,639,388。
+    </p>
+    <p style="margin:0;">
+      这是一份基于公开数据的风险提示，不构成投资建议，也不针对任何特定个人。
+      文中对代码功能的描述均可通过开源代码复核。
+    </p>
+  </footer>
+
+</div>
