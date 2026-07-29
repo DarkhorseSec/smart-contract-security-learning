@@ -1,0 +1,340 @@
+<title>关于 CryptoDAO / Pro Token "被黑客增发"的链上核查报告</title>
+
+<style>
+  :root {
+    --paper: #F4F5F7; --card: #FFFFFF; --ink: #14171C; --ink-soft: #4A525E;
+    --ink-faint: #767F8B; --rule: #D9DDE3; --accent: #1D4E6B; --accent-soft: #1d4e6b14;
+    --critical: #A32B24; --critical-soft: #a32b2410; --money: #7E6218; --ok: #2A6B4F;
+    --ok-soft: #2a6b4f12;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0F1216; --card: #161A20; --ink: #E7EAEE; --ink-soft: #9DA7B4;
+      --ink-faint: #6E7885; --rule: #262C34; --accent: #74AACE; --accent-soft: #74aace1a;
+      --critical: #E4736A; --critical-soft: #e4736a14; --money: #C9A552; --ok: #5FB78F;
+      --ok-soft: #5fb78f14;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0F1216; --card: #161A20; --ink: #E7EAEE; --ink-soft: #9DA7B4;
+    --ink-faint: #6E7885; --rule: #262C34; --accent: #74AACE; --accent-soft: #74aace1a;
+    --critical: #E4736A; --critical-soft: #e4736a14; --money: #C9A552; --ok: #5FB78F; --ok-soft: #5fb78f14;
+  }
+  :root[data-theme="light"] {
+    --paper: #F4F5F7; --card: #FFFFFF; --ink: #14171C; --ink-soft: #4A525E;
+    --ink-faint: #767F8B; --rule: #D9DDE3; --accent: #1D4E6B; --accent-soft: #1d4e6b14;
+    --critical: #A32B24; --critical-soft: #a32b2410; --money: #7E6218; --ok: #2A6B4F; --ok-soft: #2a6b4f12;
+  }
+  :root {
+    --font-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+    --font-sans: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+  }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 3.5rem 1.35rem 5rem; display: flex; flex-direction: column; gap: 2.75rem; }
+  .masthead { display: flex; flex-direction: column; gap: 1rem; }
+  .stamp { align-self: flex-start; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: 2px; padding: 0.3rem 0.6rem; }
+  h1 { font-family: var(--font-serif); font-size: clamp(1.9rem, 5.5vw, 2.7rem); line-height: 1.28; font-weight: 700; letter-spacing: 0.01em; text-wrap: balance; margin: 0; }
+  .dek { font-size: 1.06rem; color: var(--ink-soft); max-width: 38rem; text-wrap: pretty; }
+  .meta { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 0.7rem 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
+  .verdict { background: var(--ok-soft); border-left: 3px solid var(--ok); padding: 1.3rem 1.4rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .verdict.warn { background: var(--critical-soft); border-left-color: var(--critical); }
+  .verdict h2 { font-family: var(--font-serif); font-size: 1.22rem; margin: 0; color: var(--ok); }
+  .verdict.warn h2 { color: var(--critical); }
+  .verdict p { margin: 0; }
+  .figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .fig { background: var(--card); padding: 1rem 1.1rem; }
+  .fig .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; display: block; line-height: 1.2; }
+  .fig .n.money { color: var(--money); }
+  .fig .n.bad { color: var(--critical); }
+  .fig .n.ok { color: var(--ok); }
+  .fig .l { font-size: 0.8rem; color: var(--ink-faint); }
+  section.ev { display: flex; flex-direction: column; gap: 0.9rem; }
+  .ev-head { display: flex; gap: 0.85rem; align-items: baseline; }
+  .ev-no { font-family: var(--font-mono); font-size: 0.76rem; letter-spacing: 0.1em; color: var(--accent); border: 1px solid var(--accent); padding: 0.1rem 0.42rem; border-radius: 2px; flex: none; line-height: 1.5; }
+  .ev-head h2 { font-family: var(--font-serif); font-size: clamp(1.2rem, 3.6vw, 1.45rem); font-weight: 700; margin: 0; line-height: 1.4; text-wrap: balance; }
+  section.ev p { margin: 0; }
+  .proof { background: var(--card); border: 1px solid var(--rule); padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.94rem; }
+  .proof .tag { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .proof ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  ul.pts { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  code, .addr { font-family: var(--font-mono); font-size: 0.86em; word-break: break-all; background: var(--accent-soft); padding: 0.06em 0.32em; border-radius: 2px; }
+  b.hot { color: var(--critical); }
+  b.good { color: var(--ok); }
+  b.cash { color: var(--money); font-variant-numeric: tabular-nums; }
+  .note { font-size: 0.9rem; color: var(--ink-soft); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 28rem; }
+  th, td { padding: 0.6rem 0.9rem; text-align: right; border-bottom: 1px solid var(--rule); }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .flow-step { display: grid; grid-template-columns: 1.9rem 1fr; gap: 0.9rem; padding: 0.85rem 0; border-bottom: 1px dashed var(--rule); }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-icon { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); text-align: right; padding-top: 0.15rem; }
+  .flow-body { display: flex; flex-direction: column; gap: 0.2rem; }
+  .flow-body .t { font-weight: 600; }
+  .flow-body .s { font-size: 0.88rem; color: var(--ink-soft); }
+  h2.sec { font-family: var(--font-serif); font-size: 1.5rem; margin: 0 0 0.2rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--ink); text-wrap: balance; }
+  section.block { display: flex; flex-direction: column; gap: 1.1rem; }
+  .rebut { display: flex; flex-direction: column; gap: 1.1rem; }
+  .rebut-item { border-left: 2px solid var(--rule); padding-left: 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .rebut-q { font-weight: 600; color: var(--ink-soft); }
+  .rebut-q::before { content: "有人会说："; color: var(--ink-faint); font-weight: 400; }
+  .rebut-a::before { content: "链上事实：" ; color: var(--critical); font-weight: 700; }
+  .foot { font-size: 0.84rem; color: var(--ink-faint); border-top: 1px solid var(--rule); padding-top: 1.3rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <span class="stamp">链上核查 · 独立取证</span>
+    <h1>项目方说"被黑客攻击、代币被大量增发"<br>链上账本说：供应量根本没异常变化</h1>
+    <p class="dek">
+      有个叫 CryptoDAO 的项目，代币叫 Pro（合约 0x8d65…f0e2）。
+      2026 年 7 月 28 日晚上出事后，官方对外说是"被黑客攻击导致增发"。
+      我把这个币从今年 5 月至今的每一笔铸币、当晚的每一笔大额转账、
+      以及谁有权印钱，全部在区块链上逐条核对了一遍。
+      下面每一个数字你都能自己去 BscScan 复核，我不需要你相信我。
+    </p>
+    <div class="meta">
+      <span>取证时间：2026-07-29（北京时间）</span>
+      <span>链：BNB Smart Chain</span>
+      <span>核查区块高度 ≈ #112,754,000</span>
+    </div>
+  </header>
+
+  <div class="verdict warn">
+    <h2>一句话结论</h2>
+    <p>
+      <b class="hot">"被黑客增发了很多币"这个说法，在链上找不到任何证据。</b>
+      Pro 代币的总量从今年 5 月的 738 万枚平滑增长到现在的 915 万枚，
+      是每天几万枚的正常收益发放，<b>出事当晚（7/28）也只多铸了约 5 万枚，和平时一模一样，没有任何暴增。</b>
+      当晚真正发生的，是有人用"闪电贷"手法把交易池的报价从 $60 砸到 $41、
+      抽走约 670 万 USDT，但一小时内就被套利者/护盘资金拉了回去，池子基本恢复原样，
+      发起地址最终只净赚了约 <b class="cash">5.8 万美元</b>——这是一次价格操纵，不是"增发盗币"。
+      而这个项目<b class="hot">真正的致命风险</b>是：能印钱的开关握在一个<b class="hot">不公开源码、可随时改逻辑</b>的合约手里，
+      由项目方的多签钱包控制。<b>换句话说，全世界唯一有能力"大量增发"这个币的，恰恰是项目方自己，而不是外部黑客。</b>
+    </p>
+  </div>
+
+  <div class="figures">
+    <div class="fig"><span class="n ok">无异常</span><span class="l">当晚代币增发情况</span></div>
+    <div class="fig"><span class="n">738万→915万</span><span class="l">5月至今总量（平滑增长）</span></div>
+    <div class="fig"><span class="n">约5万</span><span class="l">出事当晚铸币量（属日常）</span></div>
+    <div class="fig"><span class="n bad">$60→$41→$60</span><span class="l">当晚池价：砸盘后1小时复原</span></div>
+    <div class="fig"><span class="n money">约$5.8万</span><span class="l">操纵者最终净落袋</span></div>
+    <div class="fig"><span class="n bad">闭源+多签</span><span class="l">谁能印钱：只有项目方</span></div>
+  </div>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">核查 01</span>
+      <h2>先回答最重要的问题：这个币昨晚到底有没有"被增发很多"？没有。</h2>
+    </div>
+    <p>
+      一个代币的"总量"（totalSupply）是区块链上公开、无法伪造的数字。
+      如果真有黑客一夜之间"增发很多"，这个数字必然会出现一个陡峭的跳升。
+      我把这个数字从今年 5 月一直查到现在，它是这样变化的：
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>时间</th><th>代币总量（枚）</th><th>较上一格增加</th></tr></thead>
+        <tbody>
+          <tr><td>2026-05-15</td><td class="num">7,377,669</td><td class="num">—</td></tr>
+          <tr><td>2026-06-05</td><td class="num">8,239,552</td><td class="num">+861,883</td></tr>
+          <tr><td>2026-06-25</td><td class="num">8,408,481</td><td class="num">+168,929</td></tr>
+          <tr><td>2026-07-15</td><td class="num">8,815,748</td><td class="num">+407,267</td></tr>
+          <tr><td>2026-07-28 12:00</td><td class="num">9,103,056</td><td class="num">+287,308</td></tr>
+          <tr><td><b>7-28 晚 19:00（出事时段）</b></td><td class="num">9,105,866</td><td class="num">+2,810</td></tr>
+          <tr><td>2026-07-29 00:00</td><td class="num">9,106,518</td><td class="num">+652</td></tr>
+          <tr><td>现在</td><td class="num">9,148,497</td><td class="num">+41,979</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      看最关键的两行：<b class="hot">出事当晚（7-28 晚 19:00 到 7-29 凌晨 0 点），总量只增加了几千枚，</b>
+      比白天任何一个时段都平静。整条曲线找不到任何跳升。
+      我还把最近 4 天里<b>每一笔铸币交易</b>都拉了出来——一共 2,276 笔，累计只铸了 23.4 万枚，
+      每笔都是 2 到 100 枚的小额，发给一堆用户地址，这是标准的"质押收益发放"，
+      <b class="hot">没有任何一笔是大额增发。</b>
+    </p>
+    <div class="proof">
+      <span class="tag">你可以这样验证</span>
+      <ul>
+        <li>打开 <code>bscscan.com/token/0x8d65744527f55d0b2338350912d5c99a81ddf0e2</code></li>
+        <li>看顶部的 "Total Supply"，再点 "Contract → Read" 里的 <code>totalSupply</code></li>
+        <li>点 "Transfers"，筛选 From 地址为 <code>0x000…000</code> 的记录（这就是"铸币"）——当晚全是小额</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">核查 02</span>
+      <h2>那昨晚到底发生了什么？一次"闪电贷"砸盘，一小时后自己弹了回去</h2>
+    </div>
+    <p>
+      7 月 28 日 <b>23:44 到 23:58</b>，一个钱包地址
+      <span class="addr">0x4276…f45d</span> 连续发了 7 笔特殊交易。
+      这种交易叫"闪电贷"——可以在同一笔交易里先借出巨额资金、操作完再还回去，
+      普通人看不懂，但它在链上的痕迹很清楚：Pro/USDT 交易池里的真金白银（USDT）被大幅抽动。
+    </p>
+    <div class="flow">
+      <div class="flow-step">
+        <span class="flow-icon">前</span>
+        <div class="flow-body">
+          <span class="t">23:40 池子状态：USDT 约 4,362 万，Pro 约 72 万枚，报价 ≈ $60.5/枚</span>
+          <span class="s">这是一个很深的池子，锁着 4,300 多万美元的真实 USDT</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">砸</span>
+        <div class="flow-body">
+          <span class="t">23:44–23:58 连环砸盘：USDT 被抽到 3,618 万，报价被打到 ≈ $41/枚</span>
+          <span class="s">短短 14 分钟，池子少了约 670 万 USDT，币价被砸下三成</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">弹</span>
+        <div class="flow-body">
+          <span class="t">次日 01:05 池子恢复：USDT 回到 4,250 万，报价回到 ≈ $60/枚</span>
+          <span class="s">一小时内，被抽走的钱几乎全被"买回来"补上了——要么是套利者见币价便宜进场，要么是项目方护盘</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-icon">今</span>
+        <div class="flow-body">
+          <span class="t">现在池子：USDT 约 4,369 万，报价 ≈ $60.6/枚，基本和出事前一样</span>
+          <span class="s">而那个发起砸盘的钱包，账上最终只留下约 5.8 万 USDT</span>
+        </div>
+      </div>
+    </div>
+    <p>
+      所以这件事的真实规模，和"黑客偷走几百万"完全不是一回事：
+      <b class="hot">池子被短暂搅动、随即复原，操纵者实际到手只有约 5.8 万美元。</b>
+      这更像是一次针对价格的套利/操纵攻击（利用了这个币定价虚高、
+      以及可能存在于闭源逻辑里的某个可被套利的机关），
+      <b>而不是"增发海量代币砸盘卷款"。</b>
+    </p>
+    <p class="note">
+      需要诚实说明的边界：这几笔交易内部走的是闭源合约，
+      我能确定的是"池子被抽动后又复原、发起方净赚约 5.8 万美元"这个结果，
+      但攻击者具体钻的是哪一个函数的空子，因为核心代码不公开，无法 100% 还原。
+      这恰恰引出下一节——这个项目最大的问题就是"不公开"。
+    </p>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">核查 03</span>
+      <h2>真正的炸弹：能"无限印钱"的开关，是一段没人能看的代码</h2>
+    </div>
+    <p>
+      Pro 代币本身的代码是公开的，写得也算规矩：它规定<b>只有一个叫 treasury（金库）的地址能印钱</b>。
+      听起来很安全？问题就出在这个金库上——
+      <b class="hot">这个金库不是一段固定的、公开的程序，而是一个"可以随时替换内部逻辑、而且源码不公开"的合约。</b>
+    </p>
+    <p>
+      用大白话打个比方：代币合约就像一台印钞机，钥匙交给了"金库"。
+      但这个金库是个<b>黑箱</b>——外人看不到它里面的规则，
+      而且它的<b class="hot">主人（项目方多签）可以随时把黑箱里的零件换掉</b>，换成任何逻辑。
+      今天它可能只按规则发点收益，明天换个零件，就能一次印出几百万、几千万枚，没有任何人能提前拦住。
+    </p>
+    <div class="proof">
+      <span class="tag">这条控制链，每一环都能在链上查到</span>
+      <ul>
+        <li>代币合约 <code>0x8d65…f0e2</code>：公开源码，<code>mint()</code> 限定只有 treasury 能调用</li>
+        <li>treasury（金库）<code>0xf907…d314</code>：一个"可升级代理"，真正干活的逻辑合约是
+          <code>0xe6fa…b901</code> —— <b class="hot">未开源</b>，没人能审计它到底能做什么</li>
+        <li>项目主合约（入口）<code>0x7b09…87d5</code>：同样是可升级代理，逻辑合约
+          <code>0x62e5…bec3</code> —— <b class="hot">也未开源</b></li>
+        <li>这两个合约的"升级权"，都握在同一个 <b>19/32 多签钱包</b>
+          <code>0x9120…9997</code> 手里（32 个人里凑够 19 个签名就能换逻辑）</li>
+      </ul>
+    </div>
+    <p class="note">
+      补充一个时间线上的事实：这个未开源的金库逻辑，最后一次被更换是在 <b>6 月 10 日</b>，
+      主合约是 3 月部署时定的。<b>出事当晚（7/28），这两个合约都没有被升级。</b>
+      也就是说，当晚没人临时"换零件"来印钱——这也和"当晚没有异常增发"的结论一致。
+    </p>
+  </section>
+
+  <section class="ev">
+    <div class="ev-head">
+      <span class="ev-no">核查 04</span>
+      <h2>顺便说清楚：这个币还有三个"随时能坑你"的开关</h2>
+    </div>
+    <p>
+      就算不谈印钱，光看公开的代币代码，项目方手里还攥着这几个开关（当前实测数值）：
+    </p>
+    <ul class="pts">
+      <li><b class="hot">一键禁止卖出（貔貅开关）</b>：代码里有个 <code>transferStatus</code> 变量，
+        项目方把它关掉，非白名单用户就<b>无法把币卖回池子</b>。现在是开着的，但随时可以关。</li>
+      <li><b class="hot">卖出税</b>：现在收 2.5%，但治理地址可以随时调高到 <b>30%</b>——你卖 100 块的币，最多被抽走 30 块。</li>
+      <li><b class="hot">定期烧池子</b>：有个 <code>balancePool()</code> 函数，每 6 小时可以把交易池里最多 5% 的币烧掉，
+        用来人为抬价。这也解释了为什么这个币的报价能长期维持在 $60 这种虚高水平。</li>
+    </ul>
+    <p>
+      这三个开关 + 上一节的"黑箱印钞机"，凑齐了一个典型的"参数全在项目方手里、
+      用户只能被动挨打"的结构。<b class="hot">币价 $60、池子锁着 4,300 多万 USDT，
+      看起来很唬人，但这套报价是靠烧池和限售人为撑起来的，不是市场真实定价。</b>
+    </p>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">那么，到底是"黑客"还是"项目方"？</h2>
+    <div class="rebut">
+      <div class="rebut-item">
+        <p class="rebut-q">是黑客攻击导致代币被大量增发的。</p>
+        <p class="rebut-a">链上的代币总量没有任何异常跳升，当晚只按日常速度铸了约 5 万枚。
+          "被大量增发"这件事，在区块链上根本没有发生。</p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">那昨晚池子被抽走几百万是真的吧？</p>
+        <p class="rebut-a">确实有一次把池价从 $60 砸到 $41、抽走约 670 万 USDT 的操作，
+          但一小时内就被补了回来，池子现已复原，操纵者实际净赚约 5.8 万美元。
+          这是价格操纵/套利，规模远小于"卷走几百万"。</p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">既然没增发，那这个项目应该没问题？</p>
+        <p class="rebut-a">恰恰相反。能"大量增发"这个币的能力真实存在——
+          它藏在一个不公开源码、可随时改逻辑的金库合约里，钥匙在项目方的多签手上。
+          今天没用不代表明天不用。<b>唯一有能力大量增发的，是项目方自己。</b></p>
+      </div>
+      <div class="rebut-item">
+        <p class="rebut-q">"被黑客攻击"这个说法本身呢？</p>
+        <p class="rebut-a">当晚确实有一次针对价格的攻击性操作，这部分可能属实。
+          但把它描述成"黑客增发了大量代币"，与链上事实不符——
+          真相是供应量没变、损失也远没那么大。用"被黑客增发"来解释一次小规模价格操纵，
+          要么是不了解链上情况，要么是在放大叙事。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">给普通人的三句话</h2>
+    <ul class="pts">
+      <li><b>1.</b> 这个币<b class="hot">昨晚没有被"增发很多"</b>——这是可以在区块链上一秒验证的硬事实。</li>
+      <li><b>2.</b> 昨晚是一次<b class="hot">小规模的价格操纵</b>，池子已复原，但它暴露了这个币定价虚高、机关重重。</li>
+      <li><b>3.</b> 真正的危险不在"昨晚"，而在<b class="hot">结构本身</b>：
+        印钞机的钥匙、禁售开关、卖出税、烧池抬价，全都攥在项目方手里，
+        而核心逻辑不公开、无法审计。<b>这类项目，能不碰就不碰；已经进去的，把它当成随时可能归零来对待。</b></li>
+    </ul>
+  </section>
+
+  <div class="foot">
+    <p>本报告全部结论基于 BNB Smart Chain 公开链上数据，取证区块高度约 #112,754,000（2026-07-29）。
+      所有地址、交易、数值均可在 bscscan.com 独立复核。这是一份点时快照，链上状态此后可能继续变化。</p>
+    <p>核心地址：代币 <code>0x8d65744527f55d0b2338350912d5c99a81ddf0e2</code>ㆍ
+      金库(印钞权) <code>0xf9074b5c035c961443373f78a6344e5adc61d314</code>ㆍ
+      项目入口 <code>0x7b09e3740b36ac42ddcdb0b174c657760d7087d5</code>ㆍ
+      Pro/USDT 池 <code>0x63844bd4bfad910b1643713302a1cc1ed20d50c3</code>ㆍ
+      当晚操纵发起 <code>0x427671b2c8e91034a91fe698f9b7259b2345f45d</code>。</p>
+    <p>独立取证 · 黑马链上侦探 🕵️‍♀️ · 本报告不构成投资建议，仅陈述链上可验证事实。</p>
+  </div>
+
+</div>
